@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { HardHat, Users, Clock, LayoutDashboard } from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
+import { HardHat, Users, Clock, LayoutDashboard, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -13,6 +15,16 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const handleLogout = () => {
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out.",
+    });
+    router.push("/");
+  };
 
   return (
     <aside className="fixed inset-y-0 left-0 z-10 hidden w-60 flex-col border-r bg-background sm:flex">
@@ -39,6 +51,12 @@ export function Sidebar() {
                 </Link>
               ))}
             </nav>
+        </div>
+        <div className="border-t p-4">
+          <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+          </Button>
         </div>
     </aside>
   );

@@ -1,10 +1,9 @@
 "use client";
 
-import { HardHat, LogOut, Menu, Users, Clock, LayoutDashboard } from "lucide-react";
+import { HardHat, Menu, Users, Clock, LayoutDashboard } from "lucide-react";
 import { Button } from "../ui/button";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { useToast } from "@/hooks/use-toast";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const pageTitles: { [key: string]: string } = {
@@ -15,17 +14,7 @@ const pageTitles: { [key: string]: string } = {
 }
 
 export function AppHeader() {
-  const router = useRouter();
   const pathname = usePathname();
-  const { toast } = useToast();
-
-  const handleLogout = () => {
-    toast({
-      title: "Logged Out",
-      description: "You have been successfully logged out.",
-    });
-    router.push("/");
-  };
   
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
@@ -65,10 +54,6 @@ export function AppHeader() {
         <h1 className="font-semibold text-lg">{pageTitles[pathname] || 'Dashboard'}</h1>
       </div>
 
-      <Button variant="ghost" size="sm" onClick={handleLogout}>
-        <LogOut className="mr-2 h-4 w-4" />
-        Logout
-      </Button>
     </header>
   );
 }
