@@ -20,7 +20,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 
-type User = {
+export type User = {
+  id: string;
   fullName: string;
   email: string;
   phone: string;
@@ -66,7 +67,7 @@ export function UsersTable({ data }: UsersTableProps) {
         </TableHeader>
         <TableBody>
           {data.map((user) => (
-            <TableRow key={user.email}>
+            <TableRow key={user.id}>
               <TableCell className="font-medium">{user.fullName}</TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.phone}</TableCell>

@@ -3,6 +3,9 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,13 +20,21 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
-  fullName: z.string().min(2, { message: "Full name must be at least 2 characters." }),
+  fullName: z
+    .string()
+    .min(2, { message: "Full name must be at least 2 characters." }),
   phone: z.string().min(10, { message: "Please enter a valid phone number." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
-  password: z.string().min(8, { message: "Password must be at least 8 characters." }),
+  password: z
+    .string()
+    .min(8, { message: "Password must be at least 8 characters." }),
 });
 
-export function CreateUserForm() {
+interface CreateUserFormProps {
+  onUserCreated: () => void;
+}
+
+export function CreateUserForm({ onUserCreated }: CreateUserFormProps) {
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -36,13 +47,38 @@ export function CreateUserForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    toast({
-      title: "User Created",
-      description: `User ${values.fullName} has been successfully created.`,
-    });
-    form.reset();
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      // Step 1: Create user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        values.email,
+        values.password
+      );
+      const user = userCredential.user;
+
+      // Step 2: Create user document in Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        fullName: values.fullName,
+        email: values.email,
+        phone: values.phone,
+        role: "Employee", // Default role
+      });
+
+      toast({
+        title: "User Created",
+        description: `User ${values.fullName} has been successfully created.`,
+      });
+      form.reset();
+      onUserCreated(); // Callback to refresh the user list
+    } catch (error: any) {
+      console.error("Error creating user:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create user. Please try again.",
+        variant: "destructive",
+      });
+    }
   }
 
   return (
@@ -100,8 +136,12 @@ export function CreateUserForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">
-          Create User
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={form.formState.isSubmitting}
+        >
+          {form.formState.isSubmitting ? "Creating..." : "Create User"}
         </Button>
       </form>
     </Form>
