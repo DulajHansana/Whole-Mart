@@ -33,9 +33,9 @@ export default function ReportPage() {
       <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
         <header className="flex items-center justify-between mb-8 no-print">
           <Button variant="outline" asChild>
-            <Link href="/dashboard">
+            <Link href="/dashboard/attendance">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Dashboard
+              Back to Attendance
             </Link>
           </Button>
           <Button onClick={() => window.print()} className="bg-accent text-accent-foreground hover:bg-accent/90">
