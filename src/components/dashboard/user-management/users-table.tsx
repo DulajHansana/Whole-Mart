@@ -83,7 +83,7 @@ export function UsersTable({ data, onUserDeleted }: UsersTableProps) {
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.phone}</TableCell>
               <TableCell>
-                <Badge variant={user.role === 'Admin' ? 'default' : 'secondary'}>
+                <Badge variant={user.role === 'Owner' ? 'default' : 'secondary'}>
                   {user.role}
                 </Badge>
               </TableCell>

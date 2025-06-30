@@ -5,7 +5,7 @@ export interface IUser extends Document {
   email: string;
   phone: string;
   password?: string; // Password is required on creation but not returned on query
-  role: string;
+  role: 'Cashier' | 'Owner' | 'Worker';
 }
 
 const UserSchema: Schema<IUser> = new Schema({
@@ -30,7 +30,8 @@ const UserSchema: Schema<IUser> = new Schema({
   },
   role: {
     type: String,
-    default: 'Employee',
+    required: [true, 'Please select a role.'],
+    enum: ['Cashier', 'Owner', 'Worker'],
   },
 }, { timestamps: true });
 
