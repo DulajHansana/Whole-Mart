@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import { deleteUser } from "@/app/actions/user.actions";
 
 export type User = {
   id: string;
@@ -30,9 +31,10 @@ export type User = {
 
 interface UsersTableProps {
   data: User[];
+  onUserDeleted: () => void;
 }
 
-export function UsersTable({ data }: UsersTableProps) {
+export function UsersTable({ data, onUserDeleted }: UsersTableProps) {
   const { toast } = useToast();
 
   const handleEdit = (user: User) => {
@@ -43,13 +45,22 @@ export function UsersTable({ data }: UsersTableProps) {
     });
   };
 
-  const handleRemove = (user: User) => {
+  const handleRemove = async (user: User) => {
     // In a real app, this would show a confirmation dialog before deleting
-    toast({
-      title: "User Removed",
-      description: `User ${user.fullName} has been removed.`,
-      variant: "destructive",
-    });
+    const result = await deleteUser(user.id);
+    if (result.success) {
+      toast({
+        title: "User Removed",
+        description: `User ${user.fullName} has been removed.`,
+      });
+      onUserDeleted(); // Refresh the list
+    } else {
+        toast({
+          title: "Error",
+          description: result.message || "Failed to remove user.",
+          variant: "destructive"
+        });
+    }
   };
 
 

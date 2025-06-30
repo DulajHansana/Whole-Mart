@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -10,33 +10,45 @@ import {
 } from "@/components/ui/card";
 import { CreateUserForm } from "@/components/dashboard/user-management/create-user-form";
 import { UsersTable, type User } from "@/components/dashboard/user-management/users-table";
-import { db } from "@/lib/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { getUsers } from "@/app/actions/user.actions";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
 export default function UserManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
-      const usersCollection = collection(db, "users");
-      const userSnapshot = await getDocs(usersCollection);
-      const userList = userSnapshot.docs.map(
-        (doc) => ({ id: doc.id, ...doc.data() } as User)
-      );
-      setUsers(userList);
+      const result = await getUsers();
+      if (result.success && result.data) {
+        // The user type from the table expects `id`, but mongoose uses `_id`. Let's map it.
+        const userList = result.data.map((user: any) => ({ ...user, id: user._id }));
+        setUsers(userList);
+      } else {
+        toast({
+          title: "Error fetching users",
+          description: result.message,
+          variant: "destructive"
+        })
+      }
     } catch (error) {
       console.error("Error fetching users: ", error);
+       toast({
+          title: "Error fetching users",
+          description: "An unexpected error occurred.",
+          variant: "destructive"
+        })
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
 
   return (
     <div className="grid gap-6 auto-rows-min lg:grid-cols-3">
@@ -56,7 +68,7 @@ export default function UserManagementPage() {
                 <Skeleton className="h-12 w-full" />
               </div>
             ) : (
-              <UsersTable data={users} />
+              <UsersTable data={users} onUserDeleted={fetchUsers} />
             )}
           </CardContent>
         </Card>

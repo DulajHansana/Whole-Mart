@@ -24,6 +24,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { loginUser } from "@/app/actions/user.actions";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -46,14 +47,22 @@ export function LoginForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // In a real app, you'd handle authentication here.
-    // For this scaffold, we'll just show a success toast and redirect.
-    toast({
-      title: "Login Successful",
-      description: "Welcome back!",
-    });
-    router.push("/dashboard");
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const result = await loginUser(values);
+    
+    if (result.success) {
+      toast({
+        title: "Login Successful",
+        description: "Welcome back!",
+      });
+      router.push("/dashboard");
+    } else {
+      toast({
+        title: "Login Failed",
+        description: result.message || "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    }
   }
 
   return (
@@ -98,8 +107,9 @@ export function LoginForm() {
             <Button
               type="submit"
               className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
+              disabled={form.formState.isSubmitting}
             >
-              Log In
+              {form.formState.isSubmitting ? "Logging In..." : "Log In"}
             </Button>
           </CardFooter>
         </form>

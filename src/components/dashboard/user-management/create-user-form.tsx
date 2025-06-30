@@ -3,9 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
+import { createUser } from "@/app/actions/user.actions";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -48,34 +46,19 @@ export function CreateUserForm({ onUserCreated }: CreateUserFormProps) {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      // Step 1: Create user in Firebase Auth
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        values.email,
-        values.password
-      );
-      const user = userCredential.user;
+    const result = await createUser(values);
 
-      // Step 2: Create user document in Firestore
-      await setDoc(doc(db, "users", user.uid), {
-        fullName: values.fullName,
-        email: values.email,
-        phone: values.phone,
-        role: "Employee", // Default role
-      });
-
+    if (result.success) {
       toast({
         title: "User Created",
         description: `User ${values.fullName} has been successfully created.`,
       });
       form.reset();
       onUserCreated(); // Callback to refresh the user list
-    } catch (error: any) {
-      console.error("Error creating user:", error);
+    } else {
       toast({
         title: "Error",
-        description: error.message || "Failed to create user. Please try again.",
+        description: result.message || "Failed to create user. Please try again.",
         variant: "destructive",
       });
     }
