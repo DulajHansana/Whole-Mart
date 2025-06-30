@@ -6,9 +6,21 @@ import mongoose from 'mongoose';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 
-// Helper to convert Mongoose doc to plain object
+// Helper to convert Mongoose doc to plain object and map _id to id
 const toPlainObject = (doc: any) => {
+  if (!doc) return doc;
   const plain = JSON.parse(JSON.stringify(doc));
+  if (Array.isArray(plain)) {
+    return plain.map(item => {
+      if (item._id) {
+        item.id = item._id;
+      }
+      return item;
+    });
+  }
+  if (plain._id) {
+    plain.id = plain._id;
+  }
   return plain;
 };
 

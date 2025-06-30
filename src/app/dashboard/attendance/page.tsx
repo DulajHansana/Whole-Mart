@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
 import { TimeClock } from "@/components/dashboard/time-clock";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { AttendanceTable } from "@/components/dashboard/attendance-table";
@@ -11,34 +14,92 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useAuth } from "@/hooks/use-auth";
+import { getAttendanceRecords } from "@/app/actions/attendance.actions";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
+import { format, parseISO, startOfMonth, isWithinInterval } from 'date-fns';
 
-const attendanceData = [
-  { date: "2024-07-22", checkIn: "09:03 AM", checkOut: "05:05 PM", totalHours: "8.03" },
-  { date: "2024-07-21", checkIn: "08:55 AM", checkOut: "05:00 PM", totalHours: "8.08" },
-  { date: "2024-07-20", checkIn: "09:15 AM", checkOut: "05:30 PM", totalHours: "8.25" },
-  { date: "2024-07-19", checkIn: "09:00 AM", checkOut: "04:45 PM", totalHours: "7.75" },
-  { date: "2024-07-18", checkIn: "09:08 AM", checkOut: "05:10 PM", totalHours: "8.03" },
-  { date: "2024-07-17", checkIn: "09:00 AM", checkOut: "05:00 PM", totalHours: "8.00" },
-  { date: "2024-07-16", checkIn: "09:12 AM", checkOut: "05:12 PM", totalHours: "8.00" },
-  { date: "2024-07-15", checkIn: "08:45 AM", checkOut: "05:15 PM", totalHours: "8.50" },
-];
+type FormattedAttendanceEntry = {
+  date: string;
+  checkIn: string;
+  checkOut: string;
+  totalHours: string;
+};
 
 export default function AttendancePage() {
-  const totalMonthHours = attendanceData.reduce((acc, entry) => acc + parseFloat(entry.totalHours), 0).toFixed(2);
+  const [attendanceData, setAttendanceData] = useState<FormattedAttendanceEntry[]>([]);
+  const [rawAttendanceData, setRawAttendanceData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  const fetchAttendance = useCallback(async () => {
+    if (!user) return;
+
+    setLoading(true);
+    const result = await getAttendanceRecords(user.id);
+    if (result.success && result.data) {
+      setRawAttendanceData(result.data);
+      const formattedData = result.data.map((record: any) => ({
+        date: format(parseISO(record.checkIn), 'yyyy-MM-dd'),
+        checkIn: format(parseISO(record.checkIn), 'p'),
+        checkOut: record.checkOut ? format(parseISO(record.checkOut), 'p') : '—',
+        totalHours: record.totalHours?.toFixed(2) ?? 'In Progress',
+      }));
+      setAttendanceData(formattedData);
+    } else {
+      toast({
+        title: "Error",
+        description: result.message || "Failed to fetch attendance records.",
+        variant: "destructive",
+      });
+    }
+    setLoading(false);
+  }, [user, toast]);
+
+  useEffect(() => {
+    fetchAttendance();
+  }, [fetchAttendance]);
+
+  const now = new Date();
+  const startOfThisMonth = startOfMonth(now);
+
+  const totalMonthHours = rawAttendanceData
+    .filter(entry => entry.checkOut && isWithinInterval(parseISO(entry.checkIn), { start: startOfThisMonth, end: now }))
+    .reduce((acc, entry) => acc + (entry.totalHours || 0), 0)
+    .toFixed(2);
+    
+  const todayHours = rawAttendanceData
+    .filter(entry => entry.checkOut && format(parseISO(entry.checkIn), 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd'))
+    .reduce((acc, entry) => acc + (entry.totalHours || 0), 0)
+    .toFixed(2);
+  
+  const todayDescription = "Live status from Time Clock";
 
   return (
     <div className="space-y-6">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <TimeClock />
-        <StatCard title="Today's Hours" value="0.00" icon={<Clock className="h-6 w-6 text-muted-foreground" />} description="You are currently checked out" />
-        <StatCard title="This Month's Total" value={`${totalMonthHours} hrs`} icon={<Calendar className="h-6 w-6 text-muted-foreground" />} description="Based on recorded hours" />
+        <StatCard 
+          title="Today's Hours" 
+          value={`${todayHours} hrs`} 
+          icon={<Clock className="h-6 w-6 text-muted-foreground" />} 
+          description={todayDescription} 
+        />
+        <StatCard 
+          title="This Month's Total" 
+          value={`${totalMonthHours} hrs`} 
+          icon={<Calendar className="h-6 w-6 text-muted-foreground" />} 
+          description="Based on recorded hours" 
+        />
       </div>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Attendance History</CardTitle>
-            <CardDescription>View and manage employee attendance records.</CardDescription>
+            <CardDescription>View and manage your attendance records.</CardDescription>
           </div>
           <Button asChild variant="outline">
             <Link href="/report">
@@ -48,7 +109,15 @@ export default function AttendancePage() {
           </Button>
         </CardHeader>
         <CardContent>
-          <AttendanceTable data={attendanceData} />
+          {loading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          ) : (
+            <AttendanceTable data={attendanceData} />
+          )}
         </CardContent>
       </Card>
     </div>

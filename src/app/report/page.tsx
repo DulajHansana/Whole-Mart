@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -14,22 +15,54 @@ import { Printer, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { useSettings } from "@/components/providers/settings-provider";
+import { useAuth } from '@/hooks/use-auth';
+import { getAttendanceRecords } from '@/app/actions/attendance.actions';
 import { cloneElement } from "react";
-
-const attendanceData = [
-    { date: "2024-07-22", checkIn: "09:03 AM", checkOut: "05:05 PM", totalHours: "8.03" },
-    { date: "2024-07-21", checkIn: "08:55 AM", checkOut: "05:00 PM", totalHours: "8.08" },
-    { date: "2024-07-20", checkIn: "09:15 AM", checkOut: "05:30 PM", totalHours: "8.25" },
-    { date: "2024-07-19", checkIn: "09:00 AM", checkOut: "04:45 PM", totalHours: "7.75" },
-    { date: "2024-07-18", checkIn: "09:08 AM", checkOut: "05:10 PM", totalHours: "8.03" },
-    { date: "2024-07-17", checkIn: "09:00 AM", checkOut: "05:00 PM", totalHours: "8.00" },
-    { date: "2024-07-16", checkIn: "09:12 AM", checkOut: "05:12 PM", totalHours: "8.00" },
-    { date: "2024-07-15", checkIn: "08:45 AM", checkOut: "05:15 PM", totalHours: "8.50" },
-];
+import { format, parseISO } from 'date-fns';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 
 export default function ReportPage() {
   const { appName, LogoComponent } = useSettings();
-  const totalMonthHours = attendanceData.reduce((acc, entry) => acc + parseFloat(entry.totalHours), 0).toFixed(2);
+  const { user } = useAuth();
+  const [attendanceData, setAttendanceData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchAttendance() {
+      if (!user) return;
+      setLoading(true);
+      const result = await getAttendanceRecords(user.id);
+      if (result.success && result.data) {
+        setAttendanceData(result.data);
+      }
+      setLoading(false);
+    }
+    fetchAttendance();
+  }, [user]);
+
+  const formattedData = attendanceData.map(record => ({
+    date: format(parseISO(record.checkIn), 'yyyy-MM-dd'),
+    checkIn: format(parseISO(record.checkIn), 'p'),
+    checkOut: record.checkOut ? format(parseISO(record.checkOut), 'p') : '—',
+    totalHours: record.totalHours?.toFixed(2) ?? '0.00',
+  }));
+
+  const totalMonthHours = attendanceData
+    .reduce((acc, entry) => acc + (entry.totalHours || 0), 0)
+    .toFixed(2);
+    
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto p-8">
+        <Skeleton className="h-10 w-48 mb-8" />
+        <Card>
+            <CardHeader><Skeleton className="h-8 w-1/2" /></CardHeader>
+            <CardContent><Skeleton className="h-64 w-full" /></CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="bg-background min-h-screen">
@@ -54,7 +87,7 @@ export default function ReportPage() {
                         {LogoComponent && cloneElement(LogoComponent as any, { className: "h-10 w-10 text-primary" })}
                         <h1 className="text-3xl font-bold font-headline">{appName}</h1>
                     </div>
-                    <p className="text-muted-foreground">Monthly Attendance Report - July 2024</p>
+                    <p className="text-muted-foreground">Monthly Attendance Report - {format(new Date(), 'MMMM yyyy')}</p>
                 </div>
                 <div className="text-right">
                     <p className="text-sm text-muted-foreground">Report Generated:</p>
@@ -67,7 +100,7 @@ export default function ReportPage() {
                 <div className="grid grid-cols-2 gap-4">
                     <div className="bg-secondary p-4 rounded-lg">
                         <p className="text-sm text-muted-foreground">Employee</p>
-                        <p className="text-lg font-semibold">John Doe</p>
+                        <p className="text-lg font-semibold">{user?.fullName || 'Employee'}</p>
                     </div>
                      <div className="bg-secondary p-4 rounded-lg">
                         <p className="text-sm text-muted-foreground">Total Hours</p>
@@ -88,8 +121,8 @@ export default function ReportPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {attendanceData.map((entry) => (
-                    <TableRow key={entry.date}>
+                  {formattedData.map((entry) => (
+                    <TableRow key={entry.date + entry.checkIn}>
                       <TableCell className="font-medium">{entry.date}</TableCell>
                       <TableCell>{entry.checkIn}</TableCell>
                       <TableCell>{entry.checkOut}</TableCell>
