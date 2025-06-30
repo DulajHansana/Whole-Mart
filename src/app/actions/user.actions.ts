@@ -15,6 +15,9 @@ const handleDbError = (error: any) => {
     if (error.message && (error.message.includes('querySrv EBADNAME') || error.message.includes('ECONNREFUSED'))) {
         return { success: false, message: "Database connection failed. Check: 1. Your MONGODB_URI in .env.local is 100% correct (no typos). 2. Your IP is allowed in MongoDB Atlas > Network Access." };
     }
+    if (error.name === 'MongoServerSelectionError') {
+        return { success: false, message: "Database connection timed out. This could be a network issue or the IP whitelist in MongoDB Atlas is blocking the connection." };
+    }
     return { success: false, message: error.message };
 }
 
