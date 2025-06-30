@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import bcrypt from 'bcryptjs';
+import mongoose from 'mongoose';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 
@@ -13,8 +14,8 @@ const toPlainObject = (doc: any) => {
 
 const handleDbError = (error: any) => {
     console.error("Database Action Error:", error);
-    // For security, return a generic error message to the client
-    return { success: false, message: "A database error occurred. Please try again later." };
+    // For debugging, we return the specific message. In production, a generic message is safer.
+    return { success: false, message: error.message || "A database error occurred. Please try again later." };
 }
 
 export async function createUser(data: any) {
@@ -35,6 +36,11 @@ export async function createUser(data: any) {
   } catch (error: any) {
     if (error.code === 11000) { // Handle duplicate email error
       return { success: false, message: "An account with this email already exists." };
+    }
+    // Handle Mongoose validation errors more specifically
+    if (error instanceof mongoose.Error.ValidationError) {
+        const errorMessages = Object.values(error.errors).map(e => e.message).join(' ');
+        return { success: false, message: `Validation Error: ${errorMessages}` };
     }
     return handleDbError(error);
   }
