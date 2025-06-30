@@ -12,17 +12,9 @@ const toPlainObject = (doc: any) => {
 };
 
 const handleDbError = (error: any) => {
-    console.error("Database Action Error:", error.message);
-    if (error.message && (error.message.includes('querySrv EBADNAME'))) {
-        return { success: false, message: "DNS Error: Cannot find database server. This is a configuration issue. Please re-verify: 1. Your MONGODB_URI in '.env.local' has NO typos. 2. In MongoDB Atlas > Network Access, you have added IP '0.0.0.0/0' (Allow Access From Anywhere) and its status is 'Active'." };
-    }
-    if (error.message.includes('ECONNREFUSED') || error.name === 'MongoServerSelectionError') {
-        return { success: false, message: "Connection Timed Out: The database is not responding. This is likely an IP Whitelist issue. In MongoDB Atlas > Network Access, please confirm '0.0.0.0/0' is active." };
-    }
-    if (error.message.includes('Authentication failed')) {
-        return { success: false, message: "Authentication Failed: The username or password in your MONGODB_URI is incorrect. Please double check your credentials."}
-    }
-    return { success: false, message: `An unexpected database error occurred: ${error.message}` };
+    console.error("Database Action Error:", error);
+    // For security, return a generic error message to the client
+    return { success: false, message: "A database error occurred. Please try again later." };
 }
 
 export async function createUser(data: any) {
@@ -41,6 +33,9 @@ export async function createUser(data: any) {
     revalidatePath('/dashboard/users');
     return { success: true, data: toPlainObject(newUser) };
   } catch (error: any) {
+    if (error.code === 11000) { // Handle duplicate email error
+      return { success: false, message: "An account with this email already exists." };
+    }
     return handleDbError(error);
   }
 }
