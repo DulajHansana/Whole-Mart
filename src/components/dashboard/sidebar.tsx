@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { HardHat, Users, Clock, LayoutDashboard, LogOut } from "lucide-react";
+import { HardHat, Users, Clock, LayoutDashboard, LogOut, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +16,7 @@ const baseNavItems = [
 const ownerNavItems = [
   ...baseNavItems,
   { href: "/dashboard/users", icon: Users, label: "Users" },
+  { href: "/dashboard/settings", icon: Settings, label: "Settings" },
 ];
 
 export function Sidebar() {

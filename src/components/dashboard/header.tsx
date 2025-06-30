@@ -1,6 +1,6 @@
 "use client";
 
-import { HardHat, Menu, Users, Clock, LayoutDashboard } from "lucide-react";
+import { HardHat, Menu, Users, Clock, LayoutDashboard, Settings } from "lucide-react";
 import { Button } from "../ui/button";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -11,6 +11,7 @@ const pageTitles: { [key: string]: string } = {
     '/dashboard': 'Dashboard',
     '/dashboard/attendance': 'Attendance Management',
     '/dashboard/users': 'User Management',
+    '/dashboard/settings': 'Settings',
     '/report': 'Attendance Report'
 }
 
@@ -45,10 +46,16 @@ export function AppHeader() {
               Attendance
             </Link>
             {user?.role === 'Owner' && (
-              <Link href="/dashboard/users" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
-                  <Users className="h-5 w-5" />
-                  Users
-              </Link>
+              <>
+                <Link href="/dashboard/users" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
+                    <Users className="h-5 w-5" />
+                    Users
+                </Link>
+                <Link href="/dashboard/settings" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
+                    <Settings className="h-5 w-5" />
+                    Settings
+                </Link>
+              </>
             )}
           </nav>
         </SheetContent>
