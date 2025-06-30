@@ -39,10 +39,10 @@ const formSchema = z.object({
 });
 
 interface CreateUserFormProps {
-  onUserCreated: () => void;
+  onUserChange: () => void;
 }
 
-export function CreateUserForm({ onUserCreated }: CreateUserFormProps) {
+export function CreateUserForm({ onUserChange }: CreateUserFormProps) {
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -52,6 +52,7 @@ export function CreateUserForm({ onUserCreated }: CreateUserFormProps) {
       phone: "",
       email: "",
       password: "",
+      role: "",
     },
   });
 
@@ -64,7 +65,7 @@ export function CreateUserForm({ onUserCreated }: CreateUserFormProps) {
         description: `User ${values.fullName} has been successfully created.`,
       });
       form.reset();
-      onUserCreated(); // Callback to refresh the user list
+      onUserChange(); // Callback to refresh the user list
     } else {
       toast({
         title: "Error",

@@ -65,6 +65,34 @@ export async function getUsers() {
   }
 }
 
+export async function updateUser(userId: string, data: any) {
+  try {
+    await dbConnect();
+
+    const updateData = { ...data };
+
+    if (updateData.password && updateData.password.trim() !== '') {
+      updateData.password = await bcrypt.hash(updateData.password, 10);
+    } else {
+      delete updateData.password;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedUser) {
+      return { success: false, message: 'User not found.' };
+    }
+
+    revalidatePath('/dashboard/users');
+    return { success: true, data: toPlainObject(updatedUser) };
+  } catch (error: any) {
+    return handleDbError(error);
+  }
+}
+
 export async function deleteUser(userId: string) {
     try {
         await dbConnect();

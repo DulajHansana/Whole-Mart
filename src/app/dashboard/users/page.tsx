@@ -109,7 +109,7 @@ export default function UserManagementPage() {
                 <Skeleton className="h-12 w-full" />
               </div>
             ) : (
-              <UsersTable data={users} onUserDeleted={fetchUsers} />
+              <UsersTable data={users} onUserChange={fetchUsers} />
             )}
           </CardContent>
         </Card>
@@ -123,7 +123,7 @@ export default function UserManagementPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <CreateUserForm onUserCreated={fetchUsers} />
+            <CreateUserForm onUserChange={fetchUsers} />
           </CardContent>
         </Card>
       </div>
