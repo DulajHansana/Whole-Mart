@@ -30,7 +30,6 @@ const UserSchema: Schema<IUser> = new Schema({
   },
   role: {
     type: String,
-    required: [true, 'Please provide a role.'],
     default: 'Employee',
   },
 }, { timestamps: true });
