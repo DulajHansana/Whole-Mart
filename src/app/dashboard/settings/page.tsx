@@ -14,15 +14,59 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useSettings, availableIcons, AvailableIconName } from "@/components/providers/settings-provider";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SettingsPage() {
   const { appName, setAppName, appLogo, setAppLogo } = useSettings();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (!authLoading) {
+      if (user?.role !== 'Owner') {
+        toast({
+          title: "Access Denied",
+          description: "You do not have permission to view this page.",
+          variant: "destructive",
+        });
+        router.push('/dashboard');
+      }
+    }
+  }, [user, authLoading, router, toast]);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  if (authLoading || user?.role !== 'Owner') {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader><Skeleton className="h-8 w-1/4" /></CardHeader>
+          <CardContent><Skeleton className="h-16 w-full" /></CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-8 w-1/4" />
+            <Skeleton className="h-4 w-1/2" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-16 w-full" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
