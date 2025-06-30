@@ -12,13 +12,17 @@ const toPlainObject = (doc: any) => {
 };
 
 const handleDbError = (error: any) => {
-    if (error.message && (error.message.includes('querySrv EBADNAME') || error.message.includes('ECONNREFUSED'))) {
-        return { success: false, message: "Database connection failed. Check: 1. Your MONGODB_URI in .env.local is 100% correct (no typos). 2. Your IP is allowed in MongoDB Atlas > Network Access." };
+    console.error("Database Action Error:", error.message);
+    if (error.message && (error.message.includes('querySrv EBADNAME'))) {
+        return { success: false, message: "DNS Error: Cannot find database server. This is a configuration issue. Please re-verify: 1. Your MONGODB_URI in '.env.local' has NO typos. 2. In MongoDB Atlas > Network Access, you have added IP '0.0.0.0/0' (Allow Access From Anywhere) and its status is 'Active'." };
     }
-    if (error.name === 'MongoServerSelectionError') {
-        return { success: false, message: "Database connection timed out. This could be a network issue or the IP whitelist in MongoDB Atlas is blocking the connection." };
+    if (error.message.includes('ECONNREFUSED') || error.name === 'MongoServerSelectionError') {
+        return { success: false, message: "Connection Timed Out: The database is not responding. This is likely an IP Whitelist issue. In MongoDB Atlas > Network Access, please confirm '0.0.0.0/0' is active." };
     }
-    return { success: false, message: error.message };
+    if (error.message.includes('Authentication failed')) {
+        return { success: false, message: "Authentication Failed: The username or password in your MONGODB_URI is incorrect. Please double check your credentials."}
+    }
+    return { success: false, message: `An unexpected database error occurred: ${error.message}` };
 }
 
 export async function createUser(data: any) {
