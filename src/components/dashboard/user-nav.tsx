@@ -30,13 +30,6 @@ export function UserNav() {
     router.push("/");
   };
 
-  const getInitials = (name: string) => {
-    if (!name) return "";
-    const names = name.split(' ');
-    const initials = names.map(n => n[0]).join('');
-    return initials.slice(0, 2).toUpperCase();
-  }
-
   if (!user) {
     return null;
   }
@@ -46,7 +39,9 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-9 w-9 rounded-full">
           <Avatar className="h-9 w-9">
-            <AvatarFallback>{getInitials(user.fullName)}</AvatarFallback>
+            <AvatarFallback>
+              <UserIcon className="h-5 w-5" />
+            </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
