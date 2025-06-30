@@ -11,6 +11,13 @@ const toPlainObject = (doc: any) => {
   return plain;
 };
 
+const handleDbError = (error: any) => {
+    if (error.message && (error.message.includes('querySrv EBADNAME') || error.message.includes('ECONNREFUSED'))) {
+        return { success: false, message: "Database connection failed. Check: 1. Your MONGODB_URI in .env.local is 100% correct (no typos). 2. Your IP is allowed in MongoDB Atlas > Network Access." };
+    }
+    return { success: false, message: error.message };
+}
+
 export async function createUser(data: any) {
   try {
     await dbConnect();
@@ -27,7 +34,7 @@ export async function createUser(data: any) {
     revalidatePath('/dashboard/users');
     return { success: true, data: toPlainObject(newUser) };
   } catch (error: any) {
-    return { success: false, message: error.message };
+    return handleDbError(error);
   }
 }
 
@@ -37,7 +44,7 @@ export async function getUsers() {
     const users = await User.find({}).sort({ createdAt: -1 });
     return { success: true, data: toPlainObject(users) };
   } catch (error: any) {
-    return { success: false, message: error.message };
+    return handleDbError(error);
   }
 }
 
@@ -48,7 +55,7 @@ export async function deleteUser(userId: string) {
         revalidatePath('/dashboard/users');
         return { success: true };
     } catch (error: any) {
-        return { success: false, message: error.message };
+        return handleDbError(error);
     }
 }
 
@@ -73,6 +80,6 @@ export async function loginUser(credentials: any) {
         return { success: true, message: "Login successful" };
 
     } catch (error: any) {
-        return { success: false, message: error.message };
+        return handleDbError(error);
     }
 }
