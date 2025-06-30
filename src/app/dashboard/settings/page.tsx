@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 import {
   Card,
   CardContent,
@@ -15,6 +17,12 @@ import { cn } from "@/lib/utils";
 
 export default function SettingsPage() {
   const { appName, setAppName, appLogo, setAppLogo } = useSettings();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -74,7 +82,13 @@ export default function SettingsPage() {
                   Enable or disable dark mode for the dashboard.
                 </p>
               </div>
-              <Switch id="dark-mode" />
+              {mounted && (
+                <Switch
+                  id="dark-mode"
+                  checked={theme === 'dark'}
+                  onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+                />
+              )}
           </div>
            <div className="flex items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
