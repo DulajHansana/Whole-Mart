@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, Users, Clock, LayoutDashboard, Settings } from "lucide-react";
+import { Menu, Users, Clock, LayoutDashboard, Settings, User } from "lucide-react";
 import { Button } from "../ui/button";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -8,12 +8,14 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/use-auth";
 import { useSettings } from "@/components/providers/settings-provider";
 import { cloneElement } from "react";
+import { UserNav } from "./user-nav";
 
 const pageTitles: { [key: string]: string } = {
     '/dashboard': 'Dashboard',
     '/dashboard/attendance': 'Attendance Management',
     '/dashboard/users': 'User Management',
     '/dashboard/settings': 'Settings',
+    '/dashboard/profile': 'My Profile',
     '/report': 'Attendance Report'
 }
 
@@ -44,6 +46,10 @@ export function AppHeader() {
               <LayoutDashboard className="h-5 w-5" />
               Dashboard
             </Link>
+             <Link href="/dashboard/profile" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
+              <User className="h-5 w-5" />
+              Profile
+            </Link>
             <Link href="/dashboard/attendance" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
               <Clock className="h-5 w-5" />
               Attendance
@@ -68,6 +74,7 @@ export function AppHeader() {
         <h1 className="font-semibold text-lg">{pageTitles[pathname] || 'Dashboard'}</h1>
       </div>
 
+      <UserNav />
     </header>
   );
 }

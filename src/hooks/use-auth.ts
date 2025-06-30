@@ -30,6 +30,13 @@ export function useAuth() {
     }
     setUser(null);
   };
+  
+  const updateAuthUser = (updatedUser: User) => {
+    setUser(updatedUser);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('loggedInUser', JSON.stringify(updatedUser));
+    }
+  }
 
-  return { user, loading, logout };
+  return { user, loading, logout, updateAuthUser };
 }

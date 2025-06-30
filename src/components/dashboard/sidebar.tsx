@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { Users, Clock, LayoutDashboard, LogOut, Settings } from "lucide-react";
+import { Users, Clock, LayoutDashboard, LogOut, Settings, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -12,6 +12,7 @@ import { cloneElement } from "react";
 
 const baseNavItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/dashboard/profile", icon: User, label: "Profile" },
   { href: "/dashboard/attendance", icon: Clock, label: "Attendance" },
 ];
 
@@ -55,8 +56,7 @@ export function Sidebar() {
                   href={item.href}
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
-                    pathname.startsWith(item.href) && item.href !== '/dashboard' && "bg-accent text-accent-foreground hover:text-accent-foreground",
-                    pathname === item.href && item.href === '/dashboard' && "bg-accent text-accent-foreground hover:text-accent-foreground"
+                    pathname === item.href && "bg-accent text-accent-foreground hover:text-accent-foreground"
                   )}
                 >
                   <item.icon className="h-4 w-4" />
