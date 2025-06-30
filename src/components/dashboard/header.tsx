@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useSettings } from "@/components/providers/settings-provider";
 import { cloneElement } from "react";
 import { UserNav } from "./user-nav";
+import { ThemeToggle } from "./theme-toggle";
 
 const pageTitles: { [key: string]: string } = {
     '/dashboard': 'Dashboard',
@@ -70,7 +71,10 @@ export function AppHeader() {
         <h1 className="font-semibold text-lg">{pageTitles[pathname] || 'Dashboard'}</h1>
       </div>
 
-      <UserNav />
+      <div className="flex items-center gap-2">
+        <ThemeToggle />
+        <UserNav />
+      </div>
     </header>
   );
 }

@@ -119,21 +119,6 @@ export default function SettingsPage() {
               })}
             </div>
           </div>
-          <div className="flex items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <Label htmlFor="dark-mode" className="text-base">Dark Mode</Label>
-                <p className="text-sm text-muted-foreground">
-                  Enable or disable dark mode for the dashboard.
-                </p>
-              </div>
-              {mounted && (
-                <Switch
-                  id="dark-mode"
-                  checked={theme === 'dark'}
-                  onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
-                />
-              )}
-          </div>
            <div className="flex items-center justify-between rounded-lg border p-4">
               <div className="space-y-0.5">
                 <Label htmlFor="email-notifications" className="text-base">Email Notifications</Label>
