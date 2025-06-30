@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
+import { SettingsProvider } from '@/components/providers/settings-provider';
 
 export const metadata: Metadata = {
   title: 'HourHarvester',
@@ -21,8 +22,10 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        {children}
-        <Toaster />
+        <SettingsProvider>
+          {children}
+          <Toaster />
+        </SettingsProvider>
       </body>
     </html>
   );

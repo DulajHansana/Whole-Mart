@@ -10,9 +10,11 @@ import {
   TableRow,
   TableFooter,
 } from "@/components/ui/table";
-import { HardHat, Printer, ArrowLeft } from "lucide-react";
+import { Printer, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { useSettings } from "@/components/providers/settings-provider";
+import { cloneElement } from "react";
 
 const attendanceData = [
     { date: "2024-07-22", checkIn: "09:03 AM", checkOut: "05:05 PM", totalHours: "8.03" },
@@ -26,6 +28,7 @@ const attendanceData = [
 ];
 
 export default function ReportPage() {
+  const { appName, LogoComponent } = useSettings();
   const totalMonthHours = attendanceData.reduce((acc, entry) => acc + parseFloat(entry.totalHours), 0).toFixed(2);
 
   return (
@@ -48,8 +51,8 @@ export default function ReportPage() {
             <div className="flex items-center justify-between pb-6 border-b mb-6">
                 <div>
                     <div className="flex items-center gap-3 mb-2">
-                        <HardHat className="h-10 w-10 text-primary" />
-                        <h1 className="text-3xl font-bold font-headline">HourHarvester</h1>
+                        {LogoComponent && cloneElement(LogoComponent as any, { className: "h-10 w-10 text-primary" })}
+                        <h1 className="text-3xl font-bold font-headline">{appName}</h1>
                     </div>
                     <p className="text-muted-foreground">Monthly Attendance Report - July 2024</p>
                 </div>
