@@ -5,6 +5,7 @@ import { Button } from "../ui/button";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useAuth } from "@/hooks/use-auth";
 
 const pageTitles: { [key: string]: string } = {
     '/dashboard': 'Dashboard',
@@ -15,6 +16,7 @@ const pageTitles: { [key: string]: string } = {
 
 export function AppHeader() {
   const pathname = usePathname();
+  const { user } = useAuth();
   
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
@@ -42,10 +44,12 @@ export function AppHeader() {
               <Clock className="h-5 w-5" />
               Attendance
             </Link>
-            <Link href="/dashboard/users" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
-                <Users className="h-5 w-5" />
-                Users
-            </Link>
+            {user?.role === 'Owner' && (
+              <Link href="/dashboard/users" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
+                  <Users className="h-5 w-5" />
+                  Users
+              </Link>
+            )}
           </nav>
         </SheetContent>
       </Sheet>

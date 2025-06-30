@@ -50,10 +50,13 @@ export function LoginForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const result = await loginUser(values);
     
-    if (result.success) {
+    if (result.success && result.user) {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('loggedInUser', JSON.stringify(result.user));
+      }
       toast({
         title: "Login Successful",
-        description: "Welcome back!",
+        description: `Welcome back, ${result.user.fullName}!`,
       });
       router.push("/dashboard");
     } else {

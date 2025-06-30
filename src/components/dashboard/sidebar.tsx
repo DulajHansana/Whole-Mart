@@ -6,10 +6,15 @@ import { HardHat, Users, Clock, LayoutDashboard, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 
-const navItems = [
+const baseNavItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/dashboard/attendance", icon: Clock, label: "Attendance" },
+];
+
+const ownerNavItems = [
+  ...baseNavItems,
   { href: "/dashboard/users", icon: Users, label: "Users" },
 ];
 
@@ -17,14 +22,18 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { toast } = useToast();
+  const { user, logout } = useAuth();
 
   const handleLogout = () => {
+    logout();
     toast({
       title: "Logged Out",
       description: "You have been successfully logged out.",
     });
     router.push("/");
   };
+
+  const navItems = user?.role === 'Owner' ? ownerNavItems : baseNavItems;
 
   return (
     <aside className="fixed inset-y-0 left-0 z-10 hidden w-60 flex-col border-r bg-background sm:flex">

@@ -92,9 +92,10 @@ export async function loginUser(credentials: any) {
             return { success: false, message: 'Invalid credentials.' };
         }
         
-        // In a real app, you'd create a session/JWT here.
-        // For now, we just confirm login is successful.
-        return { success: true, message: "Login successful" };
+        const userObject = toPlainObject(user);
+        delete userObject.password;
+
+        return { success: true, user: userObject };
 
     } catch (error: any) {
         return handleDbError(error);

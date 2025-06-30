@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -13,18 +14,33 @@ import { UsersTable, type User } from "@/components/dashboard/user-management/us
 import { getUsers } from "@/app/actions/user.actions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function UserManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { user, loading: authLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!authLoading) {
+      if (user?.role !== 'Owner') {
+        toast({
+          title: "Access Denied",
+          description: "You do not have permission to view this page.",
+          variant: "destructive",
+        });
+        router.push('/dashboard');
+      }
+    }
+  }, [user, authLoading, router, toast]);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
       const result = await getUsers();
       if (result.success && result.data) {
-        // The user type from the table expects `id`, but mongoose uses `_id`. Let's map it.
         const userList = result.data.map((user: any) => ({ ...user, id: user._id }));
         setUsers(userList);
       } else {
@@ -47,8 +63,33 @@ export default function UserManagementPage() {
   }, [toast]);
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    if (user?.role === 'Owner') {
+      fetchUsers();
+    }
+  }, [fetchUsers, user]);
+  
+  // Render nothing or a loading skeleton while checking auth
+  if (authLoading || user?.role !== 'Owner') {
+    return (
+       <div className="grid gap-6 auto-rows-min lg:grid-cols-3">
+        <div className="lg:col-span-3">
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-8 w-1/4" />
+              <Skeleton className="h-4 w-1/2" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="grid gap-6 auto-rows-min lg:grid-cols-3">
