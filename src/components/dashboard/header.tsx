@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, Users, Clock, LayoutDashboard, Settings, User } from "lucide-react";
+import { Menu, Users, Clock, LayoutDashboard, Settings } from "lucide-react";
 import { Button } from "../ui/button";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -45,10 +45,6 @@ export function AppHeader() {
             <Link href="/dashboard" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
               <LayoutDashboard className="h-5 w-5" />
               Dashboard
-            </Link>
-             <Link href="/dashboard/profile" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
-              <User className="h-5 w-5" />
-              Profile
             </Link>
             <Link href="/dashboard/attendance" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
               <Clock className="h-5 w-5" />

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { Users, Clock, LayoutDashboard, LogOut, Settings, User } from "lucide-react";
+import { Users, Clock, LayoutDashboard, LogOut, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -12,7 +12,6 @@ import { cloneElement } from "react";
 
 const baseNavItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/dashboard/profile", icon: User, label: "Profile" },
   { href: "/dashboard/attendance", icon: Clock, label: "Attendance" },
 ];
 
