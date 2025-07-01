@@ -1,3 +1,4 @@
+
 'use server';
 
 import { revalidatePath } from 'next/cache';
@@ -26,6 +27,10 @@ const toPlainObject = (doc: any) => {
 
 const handleDbError = (error: any) => {
     console.error("Database Action Error:", error);
+
+    if (error.name === 'MongoServerError' && (error.code === 8000 || (error.message && error.message.includes('authentication failed')))) {
+        return { success: false, message: "Database authentication failed. Please check your MONGODB_URI credentials." };
+    }
     
     if (error.name === 'MongooseServerSelectionError') {
        return { success: false, message: "Could not connect to the database. Check your network settings and ensure your server's IP address is whitelisted in MongoDB Atlas." };
@@ -35,7 +40,8 @@ const handleDbError = (error: any) => {
         const errorMessages = Object.values(error.errors).map(e => e.message).join(' ');
         return { success: false, message: `Validation Error: ${errorMessages}` };
     }
-    return { success: false, message: error.message || "A database error occurred." };
+    
+    return { success: false, message: error.message || "A database error occurred. Please try again later." };
 }
 
 export async function checkIn(userId: string) {
