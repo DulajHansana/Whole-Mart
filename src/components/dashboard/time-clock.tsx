@@ -98,7 +98,7 @@ export function TimeClock() {
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center text-center space-y-4 flex-1">
         <div className="space-y-1">
-          <p className="text-2xl font-semibold">{isLoading ? 'Loading...' : statusText}</p>
+          <p className="text-xl sm:text-2xl font-semibold">{isLoading ? 'Loading...' : statusText}</p>
           {lastActionTime && !isLoading && (
             <p className="text-sm text-muted-foreground">
               Last action at: {lastActionTime.toLocaleTimeString()}

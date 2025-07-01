@@ -96,7 +96,7 @@ export default function AttendancePage() {
       </div>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle>Attendance History</CardTitle>
             <CardDescription>View and manage your attendance records.</CardDescription>

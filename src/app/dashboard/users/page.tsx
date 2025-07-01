@@ -68,7 +68,6 @@ export default function UserManagementPage() {
     }
   }, [fetchUsers, user]);
   
-  // Render nothing or a loading skeleton while checking auth
   if (authLoading || user?.role !== 'Owner') {
     return (
        <div className="grid gap-6 auto-rows-min lg:grid-cols-3">
@@ -92,8 +91,8 @@ export default function UserManagementPage() {
   }
 
   return (
-    <div className="grid gap-6 auto-rows-min lg:grid-cols-3">
-      <div className="lg:col-span-2">
+    <div className="flex flex-col lg:flex-row gap-6">
+      <div className="lg:w-2/3 order-2 lg:order-1">
         <Card>
           <CardHeader>
             <CardTitle>Users</CardTitle>
@@ -114,7 +113,7 @@ export default function UserManagementPage() {
           </CardContent>
         </Card>
       </div>
-      <div>
+      <div className="lg:w-1/3 order-1 lg:order-2">
         <Card>
           <CardHeader>
             <CardTitle>Create User</CardTitle>
