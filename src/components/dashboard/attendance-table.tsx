@@ -33,7 +33,7 @@ export function AttendanceTable({ data }: AttendanceTableProps) {
         </TableHeader>
         <TableBody>
           {data.map((entry) => (
-            <TableRow key={entry.date}>
+            <TableRow key={entry.date + entry.checkIn}>
               <TableCell className="font-medium">{entry.date}</TableCell>
               <TableCell>{entry.checkIn}</TableCell>
               <TableCell>{entry.checkOut}</TableCell>
