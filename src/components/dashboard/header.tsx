@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Menu, Users, Clock, LayoutDashboard, Settings } from "lucide-react";
@@ -7,7 +8,7 @@ import Link from "next/link";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/use-auth";
 import { useSettings } from "@/components/providers/settings-provider";
-import { cloneElement } from "react";
+import { cloneElement, ReactElement } from "react";
 import { UserNav } from "./user-nav";
 import { ThemeToggle } from "./theme-toggle";
 
@@ -40,7 +41,7 @@ export function AppHeader() {
               href="/dashboard"
               className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
             >
-              {LogoComponent && cloneElement(LogoComponent as any, { className: "h-5 w-5 transition-all group-hover:scale-110" })}
+              {LogoComponent && cloneElement(LogoComponent as ReactElement, { className: "h-5 w-5 transition-all group-hover:scale-110" })}
               <span className="sr-only">{appName}</span>
             </Link>
             <Link href="/dashboard" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">

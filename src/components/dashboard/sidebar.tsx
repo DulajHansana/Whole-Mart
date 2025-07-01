@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { useSettings } from "@/components/providers/settings-provider";
-import { cloneElement } from "react";
+import { cloneElement, ReactElement } from "react";
 
 const baseNavItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -43,7 +44,7 @@ export function Sidebar() {
     <aside className="fixed inset-y-0 left-0 z-10 hidden w-60 flex-col border-r bg-background sm:flex">
         <div className="flex h-16 items-center border-b px-6">
             <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-                {LogoComponent && cloneElement(LogoComponent as any, { className: "h-6 w-6 text-primary" })}
+                {LogoComponent && cloneElement(LogoComponent as ReactElement, { className: "h-6 w-6 text-primary" })}
                 <span className="text-foreground">{appName}</span>
             </Link>
         </div>

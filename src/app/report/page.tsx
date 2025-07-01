@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, cloneElement, ReactElement } from 'react';
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -17,15 +18,17 @@ import { Badge } from "@/components/ui/badge";
 import { useSettings } from "@/components/providers/settings-provider";
 import { useAuth } from '@/hooks/use-auth';
 import { getAttendanceRecords } from '@/app/actions/attendance.actions';
-import { cloneElement } from "react";
 import { format, parseISO } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { IAttendance } from '@/models/Attendance';
+
+type RawAttendanceData = Omit<IAttendance, '_id' | 'userId'> & { id: string, userId: string, checkIn: string, checkOut?: string };
 
 export default function ReportPage() {
   const { appName, LogoComponent } = useSettings();
   const { user } = useAuth();
-  const [attendanceData, setAttendanceData] = useState<any[]>([]);
+  const [attendanceData, setAttendanceData] = useState<RawAttendanceData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,7 +37,7 @@ export default function ReportPage() {
       setLoading(true);
       const result = await getAttendanceRecords(user.id);
       if (result.success && result.data) {
-        setAttendanceData(result.data);
+        setAttendanceData(result.data as unknown as RawAttendanceData[]);
       }
       setLoading(false);
     }
@@ -84,7 +87,7 @@ export default function ReportPage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b mb-6">
                 <div>
                     <div className="flex items-center gap-3 mb-2">
-                        {LogoComponent && cloneElement(LogoComponent as any, { className: "h-10 w-10 text-primary" })}
+                        {LogoComponent && cloneElement(LogoComponent as ReactElement, { className: "h-10 w-10 text-primary" })}
                         <h1 className="text-2xl sm:text-3xl font-bold font-headline">{appName}</h1>
                     </div>
                     <p className="text-muted-foreground">Monthly Attendance Report - {format(new Date(), 'MMMM yyyy')}</p>

@@ -1,7 +1,7 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTheme } from "next-themes";
 import {
   Card,
   CardContent,
@@ -21,8 +21,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SettingsPage() {
   const { appName, setAppName, appLogo, setAppLogo } = useSettings();
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
@@ -39,10 +37,6 @@ export default function SettingsPage() {
       }
     }
   }, [user, authLoading, router, toast]);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   if (authLoading || user?.role !== 'Owner') {
     return (

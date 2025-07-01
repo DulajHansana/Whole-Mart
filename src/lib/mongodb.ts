@@ -1,3 +1,4 @@
+
 import mongoose from 'mongoose';
 
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -8,15 +9,25 @@ if (!MONGODB_URI) {
   );
 }
 
+interface MongooseCache {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+}
+
+// Extend the NodeJS Global type with a `mongoose` property
+declare global {
+  var mongoose: MongooseCache;
+}
+
 /**
  * Global is used here to maintain a cached connection across hot reloads
  * in development. This prevents connections growing exponentially
  * during API Route usage.
  */
-let cached = (global as any).mongoose;
+let cached = global.mongoose;
 
 if (!cached) {
-  cached = (global as any).mongoose = { conn: null, promise: null };
+  cached = global.mongoose = { conn: null, promise: null };
 }
 
 async function dbConnect() {

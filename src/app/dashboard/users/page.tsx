@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -15,6 +16,7 @@ import { getUsers } from "@/app/actions/user.actions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import { IUser } from "@/models/User";
 
 export default function UserManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -41,8 +43,8 @@ export default function UserManagementPage() {
     try {
       const result = await getUsers();
       if (result.success && result.data) {
-        const userList = result.data.map((user: any) => ({ ...user, id: user._id }));
-        setUsers(userList);
+        // Data from server action is already plain objects with `id`
+        setUsers(result.data as User[]);
       } else {
         toast({
           title: "Error fetching users",

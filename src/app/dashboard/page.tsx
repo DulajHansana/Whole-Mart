@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
@@ -13,10 +14,14 @@ import { getAttendanceRecords } from '@/app/actions/attendance.actions';
 import { getUsers } from '@/app/actions/user.actions';
 import { format, parseISO, startOfMonth, isWithinInterval } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { IAttendance } from '@/models/Attendance';
+
+type RawAttendanceData = Omit<IAttendance, '_id' | 'userId'> & { id: string, userId: string, checkIn: string, checkOut?: string };
+
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const [attendanceData, setAttendanceData] = useState<any[]>([]);
+  const [attendanceData, setAttendanceData] = useState<RawAttendanceData[]>([]);
   const [userCount, setUserCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
@@ -31,7 +36,7 @@ export default function DashboardPage() {
       ]);
       
       if (attendanceResult.success && attendanceResult.data) {
-        setAttendanceData(attendanceResult.data);
+        setAttendanceData(attendanceResult.data as unknown as RawAttendanceData[]);
       }
       
       if (usersResult.success && usersResult.data) {
@@ -43,17 +48,18 @@ export default function DashboardPage() {
     fetchData();
   }, [user]);
 
-  const now = new Date();
-  const startOfThisMonth = startOfMonth(now);
-
-  const totalMonthHours = useMemo(() => attendanceData
-    .filter(entry => entry.checkOut && isWithinInterval(parseISO(entry.checkIn), { start: startOfThisMonth, end: now }))
-    .reduce((acc, entry) => acc + (entry.totalHours || 0), 0)
-    .toFixed(2), [attendanceData, now, startOfThisMonth]);
+  const totalMonthHours = useMemo(() => {
+    const now = new Date();
+    const startOfThisMonth = startOfMonth(now);
+    return attendanceData
+      .filter(entry => entry.checkOut && isWithinInterval(parseISO(entry.checkIn), { start: startOfThisMonth, end: now }))
+      .reduce((acc, entry) => acc + (entry.totalHours || 0), 0)
+      .toFixed(2)
+    }, [attendanceData]);
 
   const recentAttendance: AttendanceEntry[] = useMemo(() => attendanceData
     .slice(0, 5)
-    .map((record: any) => ({
+    .map((record) => ({
       id: record.id,
       date: format(parseISO(record.checkIn), 'yyyy-MM-dd'),
       checkIn: format(parseISO(record.checkIn), 'p'),

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -20,10 +21,13 @@ import { getAttendanceRecords } from "@/app/actions/attendance.actions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO, startOfMonth, isWithinInterval } from 'date-fns';
+import type { IAttendance } from "@/models/Attendance";
+
+type RawAttendanceData = Omit<IAttendance, '_id' | 'userId'> & { id: string, userId: string, checkIn: string, checkOut?: string };
 
 export default function AttendancePage() {
   const [attendanceData, setAttendanceData] = useState<AttendanceEntry[]>([]);
-  const [rawAttendanceData, setRawAttendanceData] = useState<any[]>([]);
+  const [rawAttendanceData, setRawAttendanceData] = useState<RawAttendanceData[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -34,8 +38,8 @@ export default function AttendancePage() {
     setLoading(true);
     const result = await getAttendanceRecords(user.id);
     if (result.success && result.data) {
-      setRawAttendanceData(result.data);
-      const formattedData = result.data.map((record: any) => ({
+      setRawAttendanceData(result.data as unknown as RawAttendanceData[]);
+      const formattedData = result.data.map((record) => ({
         id: record.id,
         date: format(parseISO(record.checkIn), 'yyyy-MM-dd'),
         checkIn: format(parseISO(record.checkIn), 'p'),

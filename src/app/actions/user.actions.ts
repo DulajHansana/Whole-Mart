@@ -1,62 +1,75 @@
+
 'use server';
 
 import { revalidatePath } from 'next/cache';
 import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
 import dbConnect from '@/lib/mongodb';
-import User from '@/models/User';
+import User, { IUser } from '@/models/User';
+
+type PlainUser = Omit<IUser, '_id' | 'password'> & { id: string };
+type CreateUserInput = Omit<IUser, 'id'>;
+type UpdateUserInput = Partial<CreateUserInput>;
+type LoginUserInput = Pick<IUser, 'email' | 'password'>;
+
 
 // Helper to convert Mongoose doc to plain object and map _id to id
-const toPlainObject = (doc: any) => {
+const toPlainObject = (doc: mongoose.Document | mongoose.Document[] | null): PlainUser | PlainUser[] | null => {
   if (!doc) return doc;
   const plain = JSON.parse(JSON.stringify(doc));
   if (Array.isArray(plain)) {
     return plain.map(item => {
       if (item._id) {
-        item.id = item._id;
+        item.id = item._id.toString();
+        // delete item._id;
       }
       return item;
     });
   }
   if (plain._id) {
-    plain.id = plain._id;
+    plain.id = plain._id.toString();
+    // delete plain._id;
   }
   return plain;
 };
 
-const handleDbError = (error: any) => {
+const handleDbError = (error: unknown) => {
     console.error("Database Action Error:", error);
 
-    // Authentication failed
-    if (error.name === 'MongoServerError' && (error.code === 8000 || (error.message && error.message.includes('authentication failed')))) {
-        return { success: false, message: "Database authentication failed. Please check your MONGODB_URI credentials." };
-    }
-    
-    // IP Whitelist / Network issue
-    if (error.name === 'MongooseServerSelectionError') {
-       return { success: false, message: "Could not connect to the database. Check your network settings and ensure your server's IP address is whitelisted in MongoDB Atlas." };
-    }
-
-    // Duplicate key error
-    if (error.code === 11000) {
-      return { success: false, message: "An account with this email already exists." };
-    }
-
-    // Mongoose validation errors
     if (error instanceof mongoose.Error.ValidationError) {
         const errorMessages = Object.values(error.errors).map(e => e.message).join(' ');
         return { success: false, message: `Validation Error: ${errorMessages}` };
     }
 
-    // Generic fallback
-    return { success: false, message: error.message || "A database error occurred. Please try again later." };
+    if (error && typeof error === 'object') {
+        const err = error as { name?: string; code?: number; message?: string };
+        if (err.name === 'MongoServerError' && (err.code === 8000 || (err.message && err.message.includes('authentication failed')))) {
+            return { success: false, message: "Database authentication failed. Please check your MONGODB_URI credentials." };
+        }
+        
+        if (err.name === 'MongooseServerSelectionError') {
+           return { success: false, message: "Could not connect to the database. Check your network settings and ensure your server's IP address is whitelisted in MongoDB Atlas." };
+        }
+        
+        if (err.code === 11000) {
+          return { success: false, message: "An account with this email already exists." };
+        }
+
+        if (err.message) {
+            return { success: false, message: err.message || "A database error occurred. Please try again later." };
+        }
+    }
+    
+    return { success: false, message: "An unknown database error occurred. Please try again later." };
 }
 
-export async function createUser(data: any) {
+export async function createUser(data: CreateUserInput) {
   try {
     await dbConnect();
 
-    // Hash password
+    if (!data.password) {
+      return { success: false, message: "Password is required." };
+    }
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
     const newUser = new User({
@@ -66,8 +79,8 @@ export async function createUser(data: any) {
 
     await newUser.save();
     revalidatePath('/dashboard/users');
-    return { success: true, data: toPlainObject(newUser) };
-  } catch (error: any) {
+    return { success: true, data: toPlainObject(newUser) as PlainUser };
+  } catch (error: unknown) {
     return handleDbError(error);
   }
 }
@@ -76,13 +89,13 @@ export async function getUsers() {
   try {
     await dbConnect();
     const users = await User.find({}).sort({ createdAt: -1 });
-    return { success: true, data: toPlainObject(users) };
-  } catch (error: any) {
+    return { success: true, data: toPlainObject(users) as PlainUser[] };
+  } catch (error: unknown) {
     return handleDbError(error);
   }
 }
 
-export async function updateUser(userId: string, data: any) {
+export async function updateUser(userId: string, data: UpdateUserInput) {
   try {
     await dbConnect();
 
@@ -104,8 +117,8 @@ export async function updateUser(userId: string, data: any) {
     }
 
     revalidatePath('/dashboard/users');
-    return { success: true, data: toPlainObject(updatedUser) };
-  } catch (error: any) {
+    return { success: true, data: toPlainObject(updatedUser) as PlainUser };
+  } catch (error: unknown) {
     return handleDbError(error);
   }
 }
@@ -116,15 +129,19 @@ export async function deleteUser(userId: string) {
         await User.findByIdAndDelete(userId);
         revalidatePath('/dashboard/users');
         return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
         return handleDbError(error);
     }
 }
 
 
-export async function loginUser(credentials: any) {
+export async function loginUser(credentials: LoginUserInput) {
     try {
         await dbConnect();
+        if (!credentials.email || !credentials.password) {
+            return { success: false, message: 'Invalid credentials.' };
+        }
+
         const user = await User.findOne({ email: credentials.email }).select('+password');
 
         if (!user) {
@@ -137,12 +154,15 @@ export async function loginUser(credentials: any) {
             return { success: false, message: 'Invalid credentials.' };
         }
         
-        const userObject = toPlainObject(user);
-        delete userObject.password;
+        const userObject = toPlainObject(user) as PlainUser;
+        // The password field is already excluded by toPlainObject logic, but this is an extra safeguard
+        if ('password' in userObject) {
+            delete (userObject as { password?: string }).password;
+        }
 
         return { success: true, user: userObject };
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         return handleDbError(error);
     }
 }

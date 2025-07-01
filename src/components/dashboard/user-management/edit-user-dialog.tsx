@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect } from "react";
@@ -100,7 +101,7 @@ export function EditUserDialog({ isOpen, setIsOpen, user, onUserUpdated }: EditU
         <DialogHeader>
           <DialogTitle>Edit User</DialogTitle>
           <DialogDescription>
-            Make changes to the user profile here. Click save when you're done.
+            Make changes to the user profile here. Click save when you&apos;re done.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>

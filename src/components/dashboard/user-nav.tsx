@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -9,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/use-auth";
 import Link from "next/link";
 import { LogOut, User as UserIcon } from "lucide-react";
