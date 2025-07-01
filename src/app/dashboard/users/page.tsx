@@ -16,7 +16,6 @@ import { getUsers } from "@/app/actions/user.actions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { IUser } from "@/models/User";
 
 export default function UserManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
