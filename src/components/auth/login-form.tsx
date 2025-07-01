@@ -1,9 +1,11 @@
+
 "use client";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -38,6 +40,7 @@ const formSchema = z.object({
 export function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
+  const { setTheme } = useTheme();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,6 +57,7 @@ export function LoginForm() {
       if (typeof window !== 'undefined') {
         localStorage.setItem('loggedInUser', JSON.stringify(result.user));
       }
+      setTheme('light');
       toast({
         title: "Login Successful",
         description: `Welcome back, ${result.user.fullName}!`,
@@ -71,7 +75,7 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-sm shadow-lg">
       <CardHeader>
-        <CardTitle>Welcome Back</CardTitle>
+        <CardTitle className="text-xl sm:text-2xl">Welcome Back</CardTitle>
         <CardDescription>
           Enter your credentials to access your dashboard.
         </CardDescription>
