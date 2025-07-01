@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { TimeClock } from "@/components/dashboard/time-clock";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { AttendanceTable } from "@/components/dashboard/attendance-table";
+import type { AttendanceEntry } from "@/components/dashboard/attendance-table";
 import { Clock, Calendar, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -20,15 +21,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { format, parseISO, startOfMonth, isWithinInterval } from 'date-fns';
 
-type FormattedAttendanceEntry = {
-  date: string;
-  checkIn: string;
-  checkOut: string;
-  totalHours: string;
-};
-
 export default function AttendancePage() {
-  const [attendanceData, setAttendanceData] = useState<FormattedAttendanceEntry[]>([]);
+  const [attendanceData, setAttendanceData] = useState<AttendanceEntry[]>([]);
   const [rawAttendanceData, setRawAttendanceData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -42,6 +36,7 @@ export default function AttendancePage() {
     if (result.success && result.data) {
       setRawAttendanceData(result.data);
       const formattedData = result.data.map((record: any) => ({
+        id: record.id,
         date: format(parseISO(record.checkIn), 'yyyy-MM-dd'),
         checkIn: format(parseISO(record.checkIn), 'p'),
         checkOut: record.checkOut ? format(parseISO(record.checkOut), 'p') : '—',
@@ -116,7 +111,7 @@ export default function AttendancePage() {
               <Skeleton className="h-12 w-full" />
             </div>
           ) : (
-            <AttendanceTable data={attendanceData} />
+            <AttendanceTable data={attendanceData} onRecordDeleted={fetchAttendance} />
           )}
         </CardContent>
       </Card>

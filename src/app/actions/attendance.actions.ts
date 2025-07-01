@@ -7,7 +7,16 @@ import Attendance from '@/models/Attendance';
 import { differenceInMilliseconds } from 'date-fns';
 
 const toPlainObject = (doc: any) => {
+    if (!doc) return doc;
     const plain = JSON.parse(JSON.stringify(doc));
+    if (Array.isArray(plain)) {
+        return plain.map(item => {
+            if (item._id) {
+                item.id = item._id;
+            }
+            return item;
+        });
+    }
     if (plain._id) {
         plain.id = plain._id;
     }
@@ -93,6 +102,18 @@ export async function getLatestAttendanceRecord(userId: string) {
         }
 
         return { success: true, data: toPlainObject(latestRecord) };
+    } catch (error) {
+        return handleDbError(error);
+    }
+}
+
+export async function deleteAttendanceRecord(attendanceId: string) {
+    try {
+        await dbConnect();
+        await Attendance.findByIdAndDelete(attendanceId);
+        revalidatePath('/dashboard/attendance');
+        revalidatePath('/dashboard');
+        return { success: true };
     } catch (error) {
         return handleDbError(error);
     }

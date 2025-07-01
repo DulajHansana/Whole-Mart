@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { StatCard } from "@/components/dashboard/stat-card";
 import { AttendanceTable } from "@/components/dashboard/attendance-table";
+import type { AttendanceEntry } from "@/components/dashboard/attendance-table";
 import { Calendar, Users, ArrowUpRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
@@ -50,9 +51,10 @@ export default function DashboardPage() {
     .reduce((acc, entry) => acc + (entry.totalHours || 0), 0)
     .toFixed(2), [attendanceData, now, startOfThisMonth]);
 
-  const recentAttendance = useMemo(() => attendanceData
+  const recentAttendance: AttendanceEntry[] = useMemo(() => attendanceData
     .slice(0, 5)
     .map((record: any) => ({
+      id: record.id,
       date: format(parseISO(record.checkIn), 'yyyy-MM-dd'),
       checkIn: format(parseISO(record.checkIn), 'p'),
       checkOut: record.checkOut ? format(parseISO(record.checkOut), 'p') : '—',
