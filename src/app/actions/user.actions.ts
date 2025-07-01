@@ -29,9 +29,14 @@ const handleDbError = (error: any) => {
 
     // Authentication failed
     if (error.name === 'MongoServerError' && (error.code === 8000 || (error.message && error.message.includes('authentication failed')))) {
-        return { success: false, message: "Authentication Failed: The username or password in your .env.local file is incorrect. Please verify your database user credentials in MongoDB Atlas." };
+        return { success: false, message: "Database authentication failed. Please check your MONGODB_URI credentials." };
     }
     
+    // IP Whitelist / Network issue
+    if (error.name === 'MongooseServerSelectionError') {
+       return { success: false, message: "Could not connect to the database. Check your network settings and ensure your server's IP address is whitelisted in MongoDB Atlas." };
+    }
+
     // Duplicate key error
     if (error.code === 11000) {
       return { success: false, message: "An account with this email already exists." };

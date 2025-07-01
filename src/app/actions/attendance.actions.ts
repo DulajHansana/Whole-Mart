@@ -17,6 +17,11 @@ const toPlainObject = (doc: any) => {
 
 const handleDbError = (error: any) => {
     console.error("Database Action Error:", error);
+    
+    if (error.name === 'MongooseServerSelectionError') {
+       return { success: false, message: "Could not connect to the database. Check your network settings and ensure your server's IP address is whitelisted in MongoDB Atlas." };
+    }
+    
     if (error instanceof mongoose.Error.ValidationError) {
         const errorMessages = Object.values(error.errors).map(e => e.message).join(' ');
         return { success: false, message: `Validation Error: ${errorMessages}` };
