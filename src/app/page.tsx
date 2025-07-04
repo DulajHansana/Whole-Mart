@@ -3,10 +3,16 @@
 
 import { LoginForm } from "@/components/auth/login-form";
 import { useSettings } from "@/components/providers/settings-provider";
-import { cloneElement, ReactElement } from "react";
+import { cloneElement, ReactElement, useEffect } from "react";
+import { useTheme } from "next-themes";
 
 export default function Home() {
   const { appName, LogoComponent } = useSettings();
+  const { setTheme } = useTheme();
+
+  useEffect(() => {
+    setTheme("light");
+  }, [setTheme]);
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen p-4 bg-background">

@@ -27,7 +27,7 @@ interface SettingsContextType extends Settings {
 }
 
 const defaultSettings: Settings = {
-  appName: 'HourHarvester',
+  appName: 'Whole Mart',
   appLogo: 'HardHat',
 };
 
