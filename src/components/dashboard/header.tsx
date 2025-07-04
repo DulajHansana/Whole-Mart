@@ -5,7 +5,7 @@ import { Menu, Users, Clock, LayoutDashboard, Settings } from "lucide-react";
 import { Button } from "../ui/button";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/use-auth";
 import { useSettings } from "@/components/providers/settings-provider";
 import { cloneElement, ReactElement } from "react";
@@ -38,31 +38,41 @@ export function AppHeader() {
         <SheetContent side="left" className="sm:max-w-xs">
           <SheetTitle className="sr-only">Menu</SheetTitle>
           <nav className="grid gap-6 text-lg font-medium">
-            <Link
-              href="/dashboard"
-              className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
-            >
-              {LogoComponent && cloneElement(LogoComponent as ReactElement, { className: "h-5 w-5 transition-all group-hover:scale-110" })}
-              <span className="sr-only">{appName}</span>
-            </Link>
-            <Link href="/dashboard" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
-              <LayoutDashboard className="h-5 w-5" />
-              Dashboard
-            </Link>
-            <Link href="/dashboard/attendance" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
-              <Clock className="h-5 w-5" />
-              Attendance
-            </Link>
+            <SheetClose asChild>
+              <Link
+                href="/dashboard"
+                className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
+              >
+                {LogoComponent && cloneElement(LogoComponent as ReactElement, { className: "h-5 w-5 transition-all group-hover:scale-110" })}
+                <span className="sr-only">{appName}</span>
+              </Link>
+            </SheetClose>
+            <SheetClose asChild>
+              <Link href="/dashboard" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
+                <LayoutDashboard className="h-5 w-5" />
+                Dashboard
+              </Link>
+            </SheetClose>
+            <SheetClose asChild>
+              <Link href="/dashboard/attendance" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
+                <Clock className="h-5 w-5" />
+                Attendance
+              </Link>
+            </SheetClose>
             {user?.role === 'Owner' && (
               <>
-                <Link href="/dashboard/users" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
-                    <Users className="h-5 w-5" />
-                    Users
-                </Link>
-                <Link href="/dashboard/settings" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
-                    <Settings className="h-5 w-5" />
-                    Settings
-                </Link>
+                <SheetClose asChild>
+                  <Link href="/dashboard/users" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
+                      <Users className="h-5 w-5" />
+                      Users
+                  </Link>
+                </SheetClose>
+                <SheetClose asChild>
+                  <Link href="/dashboard/settings" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
+                      <Settings className="h-5 w-5" />
+                      Settings
+                  </Link>
+                </SheetClose>
               </>
             )}
           </nav>
