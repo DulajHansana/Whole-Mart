@@ -37,7 +37,7 @@ export default function ReportPage() {
       setLoading(true);
       const result = await getAttendanceRecords(user.id);
       if (result.success && result.data) {
-        setAttendanceData(result.data as unknown as RawAttendanceData[]);
+        setAttendanceData(result.data as RawAttendanceData[]);
       }
       setLoading(false);
     }
@@ -118,24 +118,25 @@ export default function ReportPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[150px]">Date</TableHead>
-                    <TableHead>Check In</TableHead>
-                    <TableHead>Check Out</TableHead>
+                    <TableHead className="hidden sm:table-cell">Check In</TableHead>
+                    <TableHead className="hidden sm:table-cell">Check Out</TableHead>
                     <TableHead className="text-right">Total Hours</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {formattedData.map((entry) => (
-                    <TableRow key={entry.date + entry.checkIn}>
+                  {formattedData.map((entry, index) => (
+                    <TableRow key={index}>
                       <TableCell className="font-medium">{entry.date}</TableCell>
-                      <TableCell>{entry.checkIn}</TableCell>
-                      <TableCell>{entry.checkOut}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{entry.checkIn}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{entry.checkOut}</TableCell>
                       <TableCell className="text-right">{entry.totalHours} hrs</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
                 <TableFooter>
                     <TableRow>
-                        <TableCell colSpan={3} className="font-bold text-right">Total Monthly Hours</TableCell>
+                        <TableCell colSpan={3} className="hidden sm:table-cell font-bold text-right">Total Monthly Hours</TableCell>
+                        <TableCell colSpan={1} className="sm:hidden font-bold text-right">Total</TableCell>
                         <TableCell className="text-right font-bold">
                           <Badge variant="default" className="text-base">{totalMonthHours} hrs</Badge>
                         </TableCell>

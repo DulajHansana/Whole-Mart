@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -72,8 +73,8 @@ export function UsersTable({ data, onUserChange }: UsersTableProps) {
           <TableHeader>
             <TableRow>
               <TableHead>Full Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Phone</TableHead>
+              <TableHead className="hidden sm:table-cell">Email</TableHead>
+              <TableHead className="hidden md:table-cell">Phone</TableHead>
               <TableHead>Role</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -82,8 +83,8 @@ export function UsersTable({ data, onUserChange }: UsersTableProps) {
             {data.map((user) => (
               <TableRow key={user.id}>
                 <TableCell className="font-medium">{user.fullName}</TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>{user.phone}</TableCell>
+                <TableCell className="hidden sm:table-cell">{user.email}</TableCell>
+                <TableCell className="hidden md:table-cell">{user.phone}</TableCell>
                 <TableCell>
                   <Badge variant={user.role === 'Owner' ? 'default' : 'secondary'}>
                     {user.role}

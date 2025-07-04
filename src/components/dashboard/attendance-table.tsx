@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -60,8 +61,8 @@ export function AttendanceTable({ data, onRecordDeleted }: AttendanceTableProps)
         <TableHeader>
           <TableRow>
             <TableHead className="w-[120px]">Date</TableHead>
-            <TableHead>Check In</TableHead>
-            <TableHead>Check Out</TableHead>
+            <TableHead className="hidden sm:table-cell">Check In</TableHead>
+            <TableHead className="hidden sm:table-cell">Check Out</TableHead>
             <TableHead className="text-right">Total Hours</TableHead>
             {onRecordDeleted && <TableHead className="w-[100px] text-right">Actions</TableHead>}
           </TableRow>
@@ -70,8 +71,8 @@ export function AttendanceTable({ data, onRecordDeleted }: AttendanceTableProps)
           {data.map((entry) => (
             <TableRow key={entry.id}>
               <TableCell className="font-medium">{entry.date}</TableCell>
-              <TableCell>{entry.checkIn}</TableCell>
-              <TableCell>{entry.checkOut}</TableCell>
+              <TableCell className="hidden sm:table-cell">{entry.checkIn}</TableCell>
+              <TableCell className="hidden sm:table-cell">{entry.checkOut}</TableCell>
               <TableCell className="text-right">
                 <Badge variant="secondary">{entry.totalHours} hrs</Badge>
               </TableCell>
