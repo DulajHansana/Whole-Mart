@@ -28,14 +28,14 @@ interface SettingsContextType extends Settings {
 
 const defaultSettings: Settings = {
   appName: 'Whole Mart',
-  appLogo: 'HardHat',
+  appLogo: 'Store',
 };
 
 export const SettingsContext = createContext<SettingsContextType>({
   ...defaultSettings,
   setAppName: () => {},
   setAppLogo: () => {},
-  LogoComponent: createElement(LucideIcons.HardHat),
+  LogoComponent: createElement(LucideIcons.Store),
 });
 
 export const useSettings = () => useContext(SettingsContext);
