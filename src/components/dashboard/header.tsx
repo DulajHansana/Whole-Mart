@@ -5,7 +5,7 @@ import { Menu, Users, Clock, LayoutDashboard, Settings } from "lucide-react";
 import { Button } from "../ui/button";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/use-auth";
 import { useSettings } from "@/components/providers/settings-provider";
 import { cloneElement, ReactElement } from "react";
@@ -36,6 +36,7 @@ export function AppHeader() {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="sm:max-w-xs">
+          <SheetTitle className="sr-only">Menu</SheetTitle>
           <nav className="grid gap-6 text-lg font-medium">
             <Link
               href="/dashboard"
