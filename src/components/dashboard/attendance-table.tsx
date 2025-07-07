@@ -87,7 +87,10 @@ export function AttendanceTable({ data, onRecordDeleted }: AttendanceTableProps)
           </TableHeader>
           <TableBody>
             {data.map((entry) => {
-              const showOtButton = isToday(new Date(entry.date)) && isOtTime && entry.checkOut !== '—';
+              const isEntryToday = isToday(new Date(entry.date));
+              const isCheckedOut = entry.checkOut !== '—';
+              const showOtButton = isEntryToday && isOtTime && isCheckedOut;
+              
               return (
               <TableRow key={entry.id}>
                 <TableCell className="font-medium">{entry.date}</TableCell>

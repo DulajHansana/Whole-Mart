@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { TimeClock } from "@/components/dashboard/time-clock";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { AttendanceTable } from "@/components/dashboard/attendance-table";
@@ -23,7 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format, parseISO, startOfMonth, isWithinInterval } from 'date-fns';
 import type { IAttendance } from "@/models/Attendance";
 
-type RawAttendanceData = Omit<IAttendance, '_id' | 'userId'> & { id: string, userId: string, checkIn: string, checkOut?: string, otHours?: number };
+type RawAttendanceData = Omit<IAttendance, '_id' | 'userId'> & { id: string, userId: string, checkIn: string, checkOut?: string, otHours?: number, totalHours?: number };
 
 export default function AttendancePage() {
   const [attendanceData, setAttendanceData] = useState<AttendanceEntry[]>([]);
@@ -38,7 +38,7 @@ export default function AttendancePage() {
     setLoading(true);
     const result = await getAttendanceRecords(user.id);
     if (result.success && result.data) {
-      setRawAttendanceData(result.data as unknown as RawAttendanceData[]);
+      setRawAttendanceData(result.data as RawAttendanceData[]);
       const formattedData = result.data.map((record) => ({
         id: record.id,
         date: format(parseISO(record.checkIn), 'yyyy-MM-dd'),
@@ -61,19 +61,23 @@ export default function AttendancePage() {
   useEffect(() => {
     fetchAttendance();
   }, [fetchAttendance]);
-
+  
   const now = new Date();
-  const startOfThisMonth = startOfMonth(now);
 
-  const totalMonthHours = rawAttendanceData
-    .filter(entry => entry.checkOut && isWithinInterval(parseISO(entry.checkIn), { start: startOfThisMonth, end: now }))
-    .reduce((acc, entry) => acc + (entry.totalHours || 0), 0)
-    .toFixed(2);
+  const totalMonthHours = useMemo(() => {
+    const startOfThisMonth = startOfMonth(now);
+    return rawAttendanceData
+      .filter(entry => entry.checkOut && isWithinInterval(parseISO(entry.checkIn), { start: startOfThisMonth, end: now }))
+      .reduce((acc, entry) => acc + (entry.totalHours || 0), 0)
+      .toFixed(2);
+  }, [rawAttendanceData, now]);
     
-  const todayHours = rawAttendanceData
-    .filter(entry => entry.checkOut && format(parseISO(entry.checkIn), 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd'))
-    .reduce((acc, entry) => acc + (entry.totalHours || 0), 0)
-    .toFixed(2);
+  const todayHours = useMemo(() => {
+    return rawAttendanceData
+      .filter(entry => entry.checkOut && format(parseISO(entry.checkIn), 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd'))
+      .reduce((acc, entry) => acc + (entry.totalHours || 0), 0)
+      .toFixed(2);
+  }, [rawAttendanceData, now]);
   
   const todayDescription = "Live status from Time Clock";
 

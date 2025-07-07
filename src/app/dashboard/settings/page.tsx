@@ -70,7 +70,7 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            Whole Mart is a trusted and modern supermarket located in the heart of Homagama. We offer a wide range of fresh groceries, household essentials, and daily needs at affordable prices. With a focus on quality, convenience, and friendly service, Whole Mart is your one-stop destination for everyday shopping in town.
+            {appName} is a trusted and modern supermarket located in your neighborhood. We offer a wide range of fresh groceries, household essentials, and daily needs at affordable prices. With a focus on quality, convenience, and friendly service, {appName} is your one-stop destination for everyday shopping.
           </p>
         </CardContent>
       </Card>
