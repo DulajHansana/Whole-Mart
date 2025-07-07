@@ -20,7 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SettingsPage() {
-  const { appName, setAppName, appLogo, setAppLogo, hourlyRate, setHourlyRate } = useSettings();
+  const { appName, setAppName, appLogo, setAppLogo, hourlyRate, setHourlyRate, otHourlyRate, setOtHourlyRate } = useSettings();
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
@@ -98,6 +98,17 @@ export default function SettingsPage() {
               type="number"
               value={hourlyRate}
               onChange={(e) => setHourlyRate(parseFloat(e.target.value) || 0)}
+              step="10"
+              min="0"
+            />
+          </div>
+           <div className="space-y-2">
+            <Label htmlFor="ot-hourly-rate">OT Salary Rate (LKR per hour)</Label>
+            <Input
+              id="ot-hourly-rate"
+              type="number"
+              value={otHourlyRate}
+              onChange={(e) => setOtHourlyRate(parseFloat(e.target.value) || 0)}
               step="10"
               min="0"
             />

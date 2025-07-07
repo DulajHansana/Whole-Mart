@@ -23,7 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format, parseISO, startOfMonth, isWithinInterval } from 'date-fns';
 import type { IAttendance } from "@/models/Attendance";
 
-type RawAttendanceData = Omit<IAttendance, '_id' | 'userId'> & { id: string, userId: string, checkIn: string, checkOut?: string };
+type RawAttendanceData = Omit<IAttendance, '_id' | 'userId'> & { id: string, userId: string, checkIn: string, checkOut?: string, otHours?: number };
 
 export default function AttendancePage() {
   const [attendanceData, setAttendanceData] = useState<AttendanceEntry[]>([]);
@@ -45,6 +45,7 @@ export default function AttendancePage() {
         checkIn: format(parseISO(record.checkIn), 'p'),
         checkOut: record.checkOut ? format(parseISO(record.checkOut), 'p') : '—',
         totalHours: record.totalHours?.toFixed(2) ?? 'In Progress',
+        otHours: record.otHours?.toFixed(2) ?? '0.00',
       }));
       setAttendanceData(formattedData);
     } else {

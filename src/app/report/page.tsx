@@ -23,10 +23,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import type { IAttendance } from '@/models/Attendance';
 
-type RawAttendanceData = Omit<IAttendance, '_id' | 'userId'> & { id: string, userId: string, checkIn: string, checkOut?: string, totalHours?: number };
+type RawAttendanceData = Omit<IAttendance, '_id' | 'userId'> & { id: string, userId: string, checkIn: string, checkOut?: string, totalHours?: number, otHours?: number };
 
 export default function ReportPage() {
-  const { appName, LogoComponent, hourlyRate } = useSettings();
+  const { appName, LogoComponent, hourlyRate, otHourlyRate } = useSettings();
   const { user } = useAuth();
   const [attendanceData, setAttendanceData] = useState<RawAttendanceData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,24 +67,36 @@ export default function ReportPage() {
     [filteredData]
   );
   
-  const totalSalary = useMemo(() => 
-    (totalPeriodHours * hourlyRate).toFixed(2),
-    [totalPeriodHours, hourlyRate]
+  const totalOtHours = useMemo(() =>
+    filteredData.reduce((acc, entry) => acc + (entry.otHours || 0), 0),
+    [filteredData]
   );
   
+  const totalSalary = useMemo(() => {
+    const regularSalary = totalPeriodHours * hourlyRate;
+    const otSalary = totalOtHours * otHourlyRate;
+    return (regularSalary + otSalary).toFixed(2);
+  }, [totalPeriodHours, totalOtHours, hourlyRate, otHourlyRate]);
+  
   const totalPeriodHoursFormatted = totalPeriodHours.toFixed(2);
+  const totalOtHoursFormatted = totalOtHours.toFixed(2);
 
   const formattedData = useMemo(() => filteredData.map(record => {
-    const hours = record.totalHours || 0;
-    const salary = (hours * hourlyRate).toFixed(2);
+    const regularHours = record.totalHours || 0;
+    const otHours = record.otHours || 0;
+    const regularSalary = regularHours * hourlyRate;
+    const otSalary = otHours * otHourlyRate;
+    const totalEntrySalary = (regularSalary + otSalary).toFixed(2);
+    
     return {
       date: format(parseISO(record.checkIn), 'yyyy-MM-dd'),
       checkIn: record.checkIn ? format(parseISO(record.checkIn), 'p') : '—',
       checkOut: record.checkOut ? format(parseISO(record.checkOut), 'p') : '—',
-      totalHours: hours.toFixed(2),
-      salary: `LKR ${salary}`,
+      totalHours: regularHours.toFixed(2),
+      otHours: otHours.toFixed(2),
+      salary: `LKR ${totalEntrySalary}`,
     };
-  }), [filteredData, hourlyRate]);
+  }), [filteredData, hourlyRate, otHourlyRate]);
 
   const reportTitle = useMemo(() => {
     const now = new Date();
@@ -148,14 +160,18 @@ export default function ReportPage() {
             </div>
 
             <div className="mb-8">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="bg-secondary p-4 rounded-lg">
                         <p className="text-sm text-muted-foreground">Employee</p>
                         <p className="text-lg font-semibold">{user?.fullName || 'Employee'}</p>
                     </div>
                      <div className="bg-secondary p-4 rounded-lg">
-                        <p className="text-sm text-muted-foreground">Total Hours for Period</p>
+                        <p className="text-sm text-muted-foreground">Regular Hours</p>
                         <p className="text-lg font-semibold">{totalPeriodHoursFormatted} hrs</p>
+                    </div>
+                     <div className="bg-secondary p-4 rounded-lg">
+                        <p className="text-sm text-muted-foreground">OT Hours</p>
+                        <p className="text-lg font-semibold">{totalOtHoursFormatted} hrs</p>
                     </div>
                      <div className="bg-secondary p-4 rounded-lg">
                         <p className="text-sm text-muted-foreground">Total Salary for Period</p>
@@ -172,8 +188,9 @@ export default function ReportPage() {
                     <TableHead className="w-[120px]">Date</TableHead>
                     <TableHead className="hidden sm:table-cell">Check In</TableHead>
                     <TableHead className="hidden sm:table-cell">Check Out</TableHead>
-                    <TableHead className="text-right">Total Hours</TableHead>
-                    <TableHead className="text-right">Salary</TableHead>
+                    <TableHead className="text-right">Regular Hours</TableHead>
+                    <TableHead className="text-right">OT Hours</TableHead>
+                    <TableHead className="text-right">Total Salary</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -184,12 +201,13 @@ export default function ReportPage() {
                         <TableCell className="hidden sm:table-cell">{entry.checkIn}</TableCell>
                         <TableCell className="hidden sm:table-cell">{entry.checkOut}</TableCell>
                         <TableCell className="text-right">{entry.totalHours} hrs</TableCell>
+                        <TableCell className="text-right">{entry.otHours} hrs</TableCell>
                         <TableCell className="text-right">{entry.salary}</TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={5} className="h-24 text-center">
+                      <TableCell colSpan={6} className="h-24 text-center">
                         No attendance records for this period.
                       </TableCell>
                     </TableRow>
@@ -197,10 +215,12 @@ export default function ReportPage() {
                 </TableBody>
                 <TableFooter>
                     <TableRow>
-                        <TableCell colSpan={3} className="hidden sm:table-cell font-bold text-right">Total for Period</TableCell>
-                        <TableCell className="sm:hidden font-bold text-left">Total</TableCell>
+                        <TableCell colSpan={3} className="font-bold text-right">Total for Period</TableCell>
                         <TableCell className="text-right font-bold">
-                          <Badge variant="default" className="text-base">{totalPeriodHoursFormatted} hrs</Badge>
+                          <Badge variant="secondary" className="text-base">{totalPeriodHoursFormatted} hrs</Badge>
+                        </TableCell>
+                         <TableCell className="text-right font-bold">
+                          <Badge variant="outline" className="text-base">{totalOtHoursFormatted} hrs</Badge>
                         </TableCell>
                         <TableCell className="text-right font-bold">
                           <Badge variant="default" className="text-base">LKR {totalSalary}</Badge>

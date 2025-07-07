@@ -5,6 +5,7 @@ export interface IAttendance extends Document {
   checkIn: Date;
   checkOut?: Date;
   totalHours?: number;
+  otHours?: number;
 }
 
 const AttendanceSchema: Schema<IAttendance> = new Schema({
@@ -23,6 +24,10 @@ const AttendanceSchema: Schema<IAttendance> = new Schema({
   totalHours: {
     type: Number,
   },
+  otHours: {
+    type: Number,
+    default: 0
+  }
 }, { timestamps: true });
 
 const Attendance: Model<IAttendance> = models.Attendance || mongoose.model<IAttendance>('Attendance', AttendanceSchema);

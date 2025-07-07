@@ -105,6 +105,33 @@ export async function checkOut(attendanceId: string) {
     }
 }
 
+export async function addOtHours(attendanceId: string, hours: number) {
+    try {
+        await dbConnect();
+        
+        if (hours < 0) {
+            return { success: false, message: 'Overtime hours cannot be negative.' };
+        }
+
+        const updatedAttendance = await Attendance.findByIdAndUpdate(
+            attendanceId,
+            { $set: { otHours: hours } },
+            { new: true }
+        );
+
+        if (!updatedAttendance) {
+            return { success: false, message: 'Attendance record not found.' };
+        }
+        
+        revalidatePath('/dashboard/attendance');
+        revalidatePath('/dashboard');
+        revalidatePath('/report');
+        return { success: true, data: toPlainObject(updatedAttendance) as PlainAttendance };
+    } catch (error) {
+        return handleDbError(error);
+    }
+}
+
 
 export async function getAttendanceRecords(userId: string) {
     try {
