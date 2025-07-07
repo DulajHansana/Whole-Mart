@@ -61,23 +61,23 @@ export default function AttendancePage() {
   useEffect(() => {
     fetchAttendance();
   }, [fetchAttendance]);
-  
-  const now = new Date();
 
   const totalMonthHours = useMemo(() => {
+    const now = new Date();
     const startOfThisMonth = startOfMonth(now);
     return rawAttendanceData
       .filter(entry => entry.checkOut && isWithinInterval(parseISO(entry.checkIn), { start: startOfThisMonth, end: now }))
       .reduce((acc, entry) => acc + (entry.totalHours || 0), 0)
       .toFixed(2);
-  }, [rawAttendanceData, now]);
+  }, [rawAttendanceData]);
     
   const todayHours = useMemo(() => {
+    const now = new Date();
     return rawAttendanceData
       .filter(entry => entry.checkOut && format(parseISO(entry.checkIn), 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd'))
       .reduce((acc, entry) => acc + (entry.totalHours || 0), 0)
       .toFixed(2);
-  }, [rawAttendanceData, now]);
+  }, [rawAttendanceData]);
   
   const todayDescription = "Live status from Time Clock";
 
