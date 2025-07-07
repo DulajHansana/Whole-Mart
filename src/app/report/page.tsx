@@ -12,7 +12,7 @@ import {
   TableRow,
   TableFooter,
 } from "@/components/ui/table";
-import { Printer, ArrowLeft, DollarSign } from "lucide-react";
+import { Printer, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { useSettings } from "@/components/providers/settings-provider";
@@ -25,10 +25,8 @@ import type { IAttendance } from '@/models/Attendance';
 
 type RawAttendanceData = Omit<IAttendance, '_id' | 'userId'> & { id: string, userId: string, checkIn: string, checkOut?: string, totalHours?: number };
 
-const HOURLY_RATE = 200; // LKR per hour
-
 export default function ReportPage() {
-  const { appName, LogoComponent } = useSettings();
+  const { appName, LogoComponent, hourlyRate } = useSettings();
   const { user } = useAuth();
   const [attendanceData, setAttendanceData] = useState<RawAttendanceData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +38,7 @@ export default function ReportPage() {
       setLoading(true);
       const result = await getAttendanceRecords(user.id);
       if (result.success && result.data) {
-        setAttendanceData(result.data);
+        setAttendanceData(result.data as RawAttendanceData[]);
       }
       setLoading(false);
     }
@@ -53,13 +51,13 @@ export default function ReportPage() {
       const start = startOfWeek(now, { weekStartsOn: 1 });
       const end = endOfWeek(now, { weekStartsOn: 1 });
       return attendanceData.filter(record => 
-          isWithinInterval(parseISO(record.checkIn), { start, end })
+          record.checkIn && isWithinInterval(parseISO(record.checkIn), { start, end })
       );
     } else { // monthly
       const start = startOfMonth(now);
       const end = endOfMonth(now);
       return attendanceData.filter(record => 
-          isWithinInterval(parseISO(record.checkIn), { start, end })
+          record.checkIn && isWithinInterval(parseISO(record.checkIn), { start, end })
       );
     }
   }, [attendanceData, reportType]);
@@ -69,20 +67,24 @@ export default function ReportPage() {
     [filteredData]
   );
   
-  const totalSalary = (totalPeriodHours * HOURLY_RATE).toFixed(2);
+  const totalSalary = useMemo(() => 
+    (totalPeriodHours * hourlyRate).toFixed(2),
+    [totalPeriodHours, hourlyRate]
+  );
+  
   const totalPeriodHoursFormatted = totalPeriodHours.toFixed(2);
 
   const formattedData = useMemo(() => filteredData.map(record => {
     const hours = record.totalHours || 0;
-    const salary = (hours * HOURLY_RATE).toFixed(2);
+    const salary = (hours * hourlyRate).toFixed(2);
     return {
       date: format(parseISO(record.checkIn), 'yyyy-MM-dd'),
-      checkIn: format(parseISO(record.checkIn), 'p'),
+      checkIn: record.checkIn ? format(parseISO(record.checkIn), 'p') : '—',
       checkOut: record.checkOut ? format(parseISO(record.checkOut), 'p') : '—',
       totalHours: hours.toFixed(2),
       salary: `LKR ${salary}`,
     };
-  }), [filteredData]);
+  }), [filteredData, hourlyRate]);
 
   const reportTitle = useMemo(() => {
     const now = new Date();

@@ -20,7 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SettingsPage() {
-  const { appName, setAppName, appLogo, setAppLogo } = useSettings();
+  const { appName, setAppName, appLogo, setAppLogo, hourlyRate, setHourlyRate } = useSettings();
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
@@ -89,6 +89,17 @@ export default function SettingsPage() {
               id="store-name" 
               value={appName} 
               onChange={(e) => setAppName(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="hourly-rate">Salary Rate (LKR per hour)</Label>
+            <Input
+              id="hourly-rate"
+              type="number"
+              value={hourlyRate}
+              onChange={(e) => setHourlyRate(parseFloat(e.target.value) || 0)}
+              step="10"
+              min="0"
             />
           </div>
           <div className="space-y-2">
